@@ -12,6 +12,7 @@ from keras.layers.core import Dense, Dropout, Activation, Flatten, Reshape
 from keras.layers import Conv2D, MaxPooling2D, Conv2DTranspose, Cropping2D, Reshape
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
 
 train_images = sorted(glob.glob(
     '/home/kengoaraki/study-machine-learning/med-dnn/med-dnn-5/train/image/*.png'))
@@ -175,3 +176,21 @@ print('pred_val:{}'.format(pred_val))
 
 show_predicts(fcn_model, pred_val, y_valid)
 # %%
+
+#mIoUの計算
+def compute_mIoU(y_pred, y_true):
+
+    y_pred = y_pred.flatten()
+    y_true = y_true.flatten()
+    current = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    #mean IoUの計算
+    intersection = np.diag(current)
+    ground_truth_set = current.sum(axis = 1)
+    predicted_set = current.sum(axis=0)
+    union = ground_truth_set + predicted_set - intersection
+    IoU = intersection / union.astype(np.float32)
+    return np.mean(IoU)   
+
+print('mIoU:{}'.format(compute_mIoU(pred_val, y_valid)))
+
+#%%
